@@ -1,5 +1,25 @@
  
 
+# # # Without data to examine here, I can only guess based on this requirement's language that 
+# # fixed records are in the input.  If so, here's a slight revision to the helper functions that I wrote earlier which
+# # takes the function fileinfo as a starting point and demonstrates calling a function from within a function.  
+# I tested this little sample on a small set of files created with MD5 checksums.  I wrote the Python in such a way as it 
+# would work with Python 2.x or 3.x (note the __future__ at the top).
+
+# # # There are so many wonderful ways of failure, so, from a development standpoint, I would probably spend a bit 
+# # more time trying to determine which failure(s) I would want to report to the user, and how (perhaps creating my own Exceptions)
+
+# # # The only other comments I would make are about safe-file handling.
+
+# # #   #1:  Question: After a user has created a file that has failed (in
+# # #        processing),can the user create a file with the same name?
+# # #        If so, then you will probably want to look at some sort
+# # #        of file-naming strategy to avoid overwriting evidence of
+# # #        earlier failures.
+
+# # # File naming is a tricky thing.  I referenced the tempfile module [1] and the Maildir naming scheme to see two different 
+# # types of solutions to the problem of choosing a unique filename.
+
 ## I am assuming that all of my files are going to be specified in unicode  
 
 ## Utilized Spyder's Scientific Computing IDE to debug, check for identation errors and test function suite
@@ -46,13 +66,13 @@ def fileinfo(f):
     filesize = os.path.getsize(f)
     return filename, rootdir, filesize
 
-#
+#returns length of file
 def file_len(f):
     with open(f) as f:
         for i, l in enumerate(f):
             pass
             return i + 1
-
+#attempts to copy file and move file to it's directory
 def copy_and_move_file(src, dest):
     try:
         os.rename(src, dest)
