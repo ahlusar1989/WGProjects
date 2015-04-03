@@ -38,7 +38,12 @@ import os.path
 import time
 import difflib
 import logging
-import shututil
+import shutil
+import mmap
+import random
+from collections import defaultdict
+
+# This is a customized logging function 
 
 def initialize_logger(output_dir):
     logger = logging.getLogger()
@@ -83,6 +88,37 @@ def file_len(f):
     return i + 1
 
 
+#mapcount, simplecount, bufcount all are written with a buffer-read strategy (with large files)
+#They will be called below the move_to_success_folder_and_read function (below)
+
+def mapcount(f):
+    f = open(f, "r+")
+    buf = mmap.mmap(f.fileno(), 0)
+    lines = 0
+    readline = buf.readline
+    while readline():
+        lines += 1
+    return lines
+
+def simplecount(f):
+    lines = 0
+    for line in open(f):
+        lines += 1
+    return lines
+
+def bufcount(f):
+    f = open(f)                  
+    lines = 0
+    buf_size = 1024 * 1024
+    read_f = f.read # loop optimization
+
+    buf = read_f(buf_size)
+    while buf:
+        lines += buf.count('\n')
+        buf = read_f(buf_size)
+    return lines
+
+
 # If directories ARE in different file systems, I would use the following helper function:
 
 # def move(src, dest): 
@@ -90,12 +126,14 @@ def file_len(f):
 
 #This helper function attempts move a file to the respective directory
 #I am assuming that the directories are in the same filesystem
+
 def copy_and_move_file(src, dest):
     try:
         os.rename(src, dest)
         # eg. src and dest are the same file
     except IOError as e:
         print('Error: %s' % e.strerror)
+
 
 #I chose the first and last line, arbitrarily for comparing lines
 #This helper function is used to as part of the validate_files function logic
@@ -110,6 +148,8 @@ def read_and_compare_first_and_last_file_line(f):
                 return True
 
 path = "."
+os.mkdir('Failure') #Failure Directory
+os.mkdir('Success') #Success Directory
 
 # Caveats of the "main" function is that it does not scale well 
 #(although it is appropriate if one assumes that there will be few changes)
@@ -141,22 +181,33 @@ def validate_files(f):
 
 
 # Failure/Success Folder Functions
+#The Failure function assumes that the "record length" is equivalent to line length and this is the error that the 
 
 def move_to_failure_folder_and_return_error_file(f):
-    filename, rootdir, filesize = fileinfo(f) #I am being redundant for the sake of explicitness to the compiler  
-    os.mkdir('Failure')
+    filename, rootdir, filesize = fileinfo(f) #I am being redundant for the sake of explicitness to the compiler    
     copy_and_move_file(rootdir, 'Failure') #file src to file destination
-    initialize_logger('rootdir/Failure')
-    logging.error("Either this file is empty or there are no lines") #assuming that record length is equivalent to line length
-     
-             
+    initialize_logger('Failure')
+
+    logging.error("Either this file is empty or the first and last line do not match") 
+
 def move_to_success_folder_and_read(f):
     filename, rootdir, filesize = fileinfo(f)  
-    os.mkdir('Success')
     copy_and_move_file(rootdir, 'Success') #file src to file destination
     print("Success", f)
     return file_len(f)
+    counts = defaultdict(list)
 
+#Below is a test for the efficiency of different counting methods - this was an interesting
+#experiment for me, when I was running tests on 1.5 - 10 GB files
+
+for i in range(5):
+    for func in [mapcount, simplecount, bufcount, opcount]:
+        start_time = time.time()
+        assert func(f) == 1209138
+        counts[func].append(time.time() - start_time)
+
+    for key, vals in counts.items():
+        print key.__name__, ":", sum(vals) / float(len(vals))
 
 
 if __name__ == '__main__':
