@@ -21,7 +21,7 @@ class EventHandler(pyinotify.ProcessEvent):
 
 
 handler = EventHandler() #instantiated EventHandler Class
-notifier = pyinotify.Notifier(wm, handler)
+notifier = pyinotify.Notifier(wm, default_proc_fun=handler)
 
 class Watcher(pyinotify.ProcessEvent): #I haave modified the Watcher class to process and read a new file creation or added file
 
@@ -87,13 +87,10 @@ while True:
         notifier.process_events()
         if notifier.check_events():
             notifier.read_events()
-    try:
     # It is important to pass named extra arguments like 'fileobj'
         handler = Empty(TrackModifications(Log(fileobj=filelog)), msg='This is an error message or notificaiton that will be logged  ')
-        notifier = pyinotify.Notifier(wm, default_proc_fun=handler)
         wm.add_watch('/tmp', pyinotify.ALL_EVENTS)
         notifier.loop()
-        filelog.close()
     except KeyboardInterrupt:
         notifier.stop()
         break
