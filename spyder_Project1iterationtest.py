@@ -74,7 +74,7 @@ def fileinfo(f):
     filesize = os.path.getsize(f)
     return filename, rootdir, filesize
 
-#This helper function returns the length of the file
+#This helper function returns the length of the file 
 
 def file_len(f):
     with open(f) as f:
@@ -88,9 +88,8 @@ def file_len(f):
 # def move(src, dest): 
 #     shutil.move(src, dest)
 
-#This helper function attempts to copy file and move file to the respective directory
+#This helper function attempts move a file to the respective directory
 #I am assuming that the directories are in the same filesystem
-
 def copy_and_move_file(src, dest):
     try:
         os.rename(src, dest)
@@ -98,9 +97,19 @@ def copy_and_move_file(src, dest):
     except IOError as e:
         print('Error: %s' % e.strerror)
 
+#I chose the first and last line, arbitrarily for comparing lines
+#This helper function is used to as part of the validate_files function logic
+
+def read_and_compare_first_and_last_file_line(f): 
+    with open(f, "rb") as f:
+        lines = f.readline()
+        if lines:
+            first_line = lines[:1]
+            last_line = lines[-1]
+            if first_line != last_line:
+                return True
 
 path = "."
-
 
 # Caveats of the "main" function is that it does not scale well 
 #(although it is appropriate if one assumes that there will be few changes)
@@ -125,7 +134,7 @@ def validate_files(f):
     #The following would could be used as an added level for security
     # creation = time.ctime(os.path.getctime(f))
     # lastmod = time.ctime(os.path.getmtime(f))
-    if file_len(f) > 0 and ##### need to compare record length(line length):
+    if file_len(f) > 0 and read_and_compare_first_and_last_file_line(f) == False: #checking index and line length
         return move_to_success_folder_and_read(f)
     else:
         return move_to_failure_folder_and_return_error_file(f)
