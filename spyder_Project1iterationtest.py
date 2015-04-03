@@ -1,8 +1,11 @@
  
 
 # # # Without data to examine here, I can only guess based on this requirement's language that 
-# # fixed records are in the input.  If so, here's a slight revision to the helper functions that I wrote earlier which
-# # takes the function fileinfo as a starting point and demonstrates calling a function from within a function.  
+# # fixed records are in the input.
+
+##I made the assumption that the directories are in the same filesystem
+
+# # Takes the function fileinfo as a starting point and demonstrates calling a function from within a function.  
 # I tested this little sample on a small set of files created with MD5 checksums.  I wrote the Python in such a way as it 
 # would work with Python 2.x or 3.x (note the __future__ at the top).
 
@@ -22,13 +25,12 @@
 
 ## I am assuming that all of my files are going to be specified in unicode  
 
-## Utilized Spyder's Scientific Computing IDE to debug, check for identation errors and test function suite
+## Utilized Spyder's Scientific Computing IDE to debug, check for indentation errors and test function suite
 
 from __future__ import print_function
 
 import os.path
 import time
-import logging
 import difflib
 import logging
 
@@ -58,7 +60,7 @@ def initialize_logger(output_dir):
     logger.addHandler(handler)
 
 
-#Returns filename, rootdir and filesize 
+#This function's purpose is to obtain the filename, rootdir and filesize 
 
 def fileinfo(f):
     filename = os.path.basename(f)
@@ -66,13 +68,21 @@ def fileinfo(f):
     filesize = os.path.getsize(f)
     return filename, rootdir, filesize
 
-#returns length of file
+#This helper function returns the length of the file
 def file_len(f):
     with open(f) as f:
         for i, l in enumerate(f):
             pass
             return i + 1
-#attempts to copy file and move file to it's directory
+
+#This helper function attempts to copy file and move file to the respective directory
+#I am assuming that the directories are in the same filesystem
+
+# If directories ARE in different file systems, I would use the following helper function:
+
+# def move(src, dest): 
+#     shutil.move(src, dest)
+
 def copy_and_move_file(src, dest):
     try:
         os.rename(src, dest)
@@ -80,18 +90,16 @@ def copy_and_move_file(src, dest):
     except IOError as e:
         print('Error: %s' % e.strerror)
 
-    
-#def main(rootdir):      
-#    while True:
-#        time.sleep(1) #time between update check   
-#    if added:
-#        print('Sucessfully added new file! We are ready to validate: ' + f)
-#        return validate_files(f)
-#    else:
-#        return move_to_failure_folder_and_return_error_file(f)
 
 path = "."
 dirlist = os.listdir(path)
+
+
+# Caveats of the "main" function is that it does not scale well 
+#(although it is appropriate if one assumes that there will be few changes)
+# It does not account for updated files existing in the directory - only new files "dropped" in
+# (If this was included in the requirements, os.stat would be appropriate here)
+
  
 def main(dirlist):   
     before = dict([(f, 0) for f in dirlist])
@@ -101,7 +109,7 @@ def main(dirlist):
     added = [f for f in after if not f in before]
     if added:
         f = ''.join(added)
-        print('Sucessfully added %s file - ready to validate') %()
+        print('Sucessfully added %s file - ready to validate') %(f)
         return validate_files(f)
     else:
         return move_to_failure_folder_and_return_error_file(f)
@@ -119,7 +127,7 @@ def validate_files(f):
         return move_to_failure_folder_and_return_error_file(f)
 
 
-#Potential Additions/Substitutions
+# Failure/Success Folder Functions
 
 def move_to_failure_folder_and_return_error_file():
     filename, rootdir, lastmod, creation, filesize = fileinfo(file)  
