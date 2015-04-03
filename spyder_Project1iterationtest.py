@@ -38,6 +38,7 @@ import os.path
 import time
 import difflib
 import logging
+import shututil
 
 def initialize_logger(output_dir):
     logger = logging.getLogger()
@@ -116,7 +117,7 @@ def main(path):
         added = [f for f in after if not f in before]
         if added:
             f = ''.join(added) #assuming that one file is added
-            print('Sucessfully added %s file - ready to validate') %(f)
+            print('Successfully added %s file - ready to validate' %(f))
             return validate_files(f)
 
     
