@@ -85,11 +85,11 @@ filelog = file('/Failure', 'w')
 while True:
     try:
         notifier.process_events()
-        if notifier.check_events():
-            notifier.read_events()
     # It is important to pass named extra arguments like 'fileobj'
-        handler = Empty(TrackModifications(Log(fileobj=filelog)), msg='This is an error message or notificaiton that will be logged  ')
+        modifications = Empty(TrackModifications(Log(fileobj=filelog)), msg='This is an error message or notificaiton that will be logged')
         wm.add_watch('/tmp', pyinotify.ALL_EVENTS)
+          if notifier.check_events():
+            notifier.read_events()
         notifier.loop()
     except KeyboardInterrupt:
         notifier.stop()
