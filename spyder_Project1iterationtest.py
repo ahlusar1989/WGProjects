@@ -187,7 +187,6 @@ def move_to_failure_folder_and_return_error_file(f):
     filename, rootdir, filesize = fileinfo(f) #I am being redundant for the sake of explicitness to the compiler    
     copy_and_move_file(rootdir, 'Failure') #file src to file destination
     initialize_logger('Failure')
-
     logging.error("Either this file is empty or the first and last line do not match") 
 
 def move_to_success_folder_and_read(f):
@@ -195,11 +194,11 @@ def move_to_success_folder_and_read(f):
     copy_and_move_file(rootdir, 'Success') #file src to file destination
     print("Success", f)
     return file_len(f)
-    counts = defaultdict(list)
 
 #Below is a test for the efficiency of different counting methods - this was an interesting
 #experiment for me, when I was running tests on 1.5 - 10 GB files
 
+counts = defaultdict(list)
 for i in range(5):
     for func in [mapcount, simplecount, bufcount, opcount]:
         start_time = time.time()
