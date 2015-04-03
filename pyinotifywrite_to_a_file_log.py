@@ -80,35 +80,27 @@ class Empty(pyinotify.ProcessEvent): #Inherited class to display message
 
 
 # pyinotify.log.setLevel(10)
-filelog = file('/var/log/pyinotify_log', 'w')
+filelog = file('/Failure', 'w')
 
 while True:
     try:
         notifier.process_events()
         if notifier.check_events():
             notifier.read_events()
-    except KeyboardInterrupt:       
-        notifier.stop()
-        break
-
     try:
     # It is important to pass named extra arguments like 'fileobj'
         handler = Empty(TrackModifications(Log(fileobj=filelog)), msg='This is an error message or notificaiton that will be logged  ')
         notifier = pyinotify.Notifier(wm, default_proc_fun=handler)
         wm.add_watch('/tmp', pyinotify.ALL_EVENTS)
         notifier.loop()
-
+        filelog.close()
+    except KeyboardInterrupt:
+        notifier.stop()
+        break
     finally:
         filelog.close()
 
 
 if __name__ == '__main__':
       Watcher()
-
-
-
-
-
-
-
 
