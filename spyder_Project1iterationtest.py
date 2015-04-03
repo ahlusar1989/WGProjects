@@ -73,7 +73,7 @@ def file_len(f):
     with open(f) as f:
         for i, l in enumerate(f):
             pass
-            return i + 1
+    return i + 1
 
 #This helper function attempts to copy file and move file to the respective directory
 #I am assuming that the directories are in the same filesystem
@@ -92,36 +92,31 @@ def copy_and_move_file(src, dest):
 
 
 path = "."
-dirlist = os.listdir(path)
 
 
 # Caveats of the "main" function is that it does not scale well 
 #(although it is appropriate if one assumes that there will be few changes)
+
 # It does not account for updated files existing in the directory - only new files "dropped" in
 # (If this was included in the requirements, os.stat would be appropriate here)
 
  
-def main(dirlist):   
-    before = dict([(f, 0) for f in dirlist])
+def main(path):   
     while True:
+        before = set([f for f in os.lisdir(path)])
         time.sleep(1) #time between update check
-    after = dict([(f, None) for f in dirlist])
-    added = [f for f in after if not f in before]
-    if added:
-        f = ''.join(added)
-        print('Sucessfully added %s file - ready to validate') %(f)
-        return validate_files(f)
-    else:
-        return move_to_failure_folder_and_return_error_file(f)
-
+        after = set([f for f in os.listdir(path)])
+        added = [f for f in after if not f in before]
+        if added:
+            f = ''.join(added) #assuming that one file is added
+            print('Sucessfully added %s file - ready to validate') %(f)
+            return validate_files(f)
 
     
 def validate_files(f):
     creation = time.ctime(os.path.getctime(f))
     lastmod = time.ctime(os.path.getmtime(f))
-    if creation == lastmod and file_len(f) > 0:
-        return move_to_success_folder_and_read(f)
-    if file_len < 0 and creation != lastmod:
+    if file_len(f) > 0 and ##### need to compare record length(line length):
         return move_to_success_folder_and_read(f)
     else:
         return move_to_failure_folder_and_return_error_file(f)
@@ -129,20 +124,20 @@ def validate_files(f):
 
 # Failure/Success Folder Functions
 
-def move_to_failure_folder_and_return_error_file():
-    filename, rootdir, lastmod, creation, filesize = fileinfo(file)  
+def move_to_failure_folder_and_return_error_file(f):
+    filename, rootdir, lastmod, creation, filesize = fileinfo(f) #I am being redundant for the sake of explicitness to the compiler  
     os.mkdir('Failure')
-    copy_and_move_file( 'Failure')
+    copy_and_move_file(rootdir, 'Failure') #file src to file destination
     initialize_logger('rootdir/Failure')
-    logging.error("Either this file is empty or there are no lines")
+    logging.error("Either this file is empty or there are no lines") #assuming that record length is equivalent to line length
      
              
-def move_to_success_folder_and_read():
-    filename, rootdir, lastmod, creation, filesize = fileinfo(file)  
+def move_to_success_folder_and_read(f):
+    filename, rootdir, lastmod, creation, filesize = fileinfo(f)  
     os.mkdir('Success')
-    copy_and_move_file(rootdir, 'Success') #file name
-    print("Success", file)
-    return file_len(file)
+    copy_and_move_file(rootdir, 'Success') #file src to file destination
+    print("Success", f)
+    return file_len(f)
 
 
 
