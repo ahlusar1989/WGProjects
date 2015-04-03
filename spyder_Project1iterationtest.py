@@ -1,18 +1,25 @@
  
+#ASSUMPTIONS
 
-# # # Without data to examine here, I can only guess based on this requirement's language that 
-# # fixed records are in the input.
+#  Without data to examine here, I can only guess based on this requirement's language that 
+#  fixed records are in the input.
 
-##I made the assumption that the directories are in the same filesystem
+#  I made the assumption that the directories are in the same filesystem
 
-# # Takes the function fileinfo as a starting point and demonstrates calling a function from within a function.  
+# I am assuming that all of my files are going to be specified in unicode 
+
+# "Record length" was assumed to signify line length of a file
+
+# Addtional comments added for each function (please see below)
+
+# # I wrote this program that takes the logic of a while loop and demonstrates calling a function from within a function.  
 # I tested this little sample on a small set of files created with MD5 checksums.  I wrote the Python in such a way as it 
 # would work with Python 2.x or 3.x (note the __future__ at the top).
 
-# # # There are so many wonderful ways of failure, so, from a development standpoint, I would probably spend a bit 
-# # more time trying to determine which failure(s) I would want to report to the user, and how (perhaps creating my own Exceptions)
+# There are so many wonderful ways of failure, so, from a development standpoint, I would probably spend a bit 
+# more time trying to determine which failure(s) I would want to report to the user, and how (perhaps creating my own Exceptions)
 
-# # # The only other comments I would make are about safe-file handling.
+# The only other comments I would make are about safe-file handling.
 
 # # #   #1:  Question: After a user has created a file that has failed (in
 # # #        processing),can the user create a file with the same name?
@@ -20,10 +27,8 @@
 # # #        of file-naming strategy to avoid overwriting evidence of
 # # #        earlier failures.
 
-# # # File naming is a tricky thing.  I referenced the tempfile module [1] and the Maildir naming scheme to see two different 
-# # types of solutions to the problem of choosing a unique filename.
-
-## I am assuming that all of my files are going to be specified in unicode  
+# File naming is a tricky thing.  I referenced the tempfile module [1] and the Maildir naming scheme to see two different 
+# types of solutions to the problem of choosing a unique filename. 
 
 ## Utilized Spyder's Scientific Computing IDE to debug, check for indentation errors and test function suite
 
@@ -69,19 +74,21 @@ def fileinfo(f):
     return filename, rootdir, filesize
 
 #This helper function returns the length of the file
+
 def file_len(f):
     with open(f) as f:
         for i, l in enumerate(f):
             pass
     return i + 1
 
-#This helper function attempts to copy file and move file to the respective directory
-#I am assuming that the directories are in the same filesystem
 
 # If directories ARE in different file systems, I would use the following helper function:
 
 # def move(src, dest): 
 #     shutil.move(src, dest)
+
+#This helper function attempts to copy file and move file to the respective directory
+#I am assuming that the directories are in the same filesystem
 
 def copy_and_move_file(src, dest):
     try:
@@ -114,8 +121,9 @@ def main(path):
 
     
 def validate_files(f):
-    creation = time.ctime(os.path.getctime(f))
-    lastmod = time.ctime(os.path.getmtime(f))
+    #The following would could be used as an added level for security
+    # creation = time.ctime(os.path.getctime(f))
+    # lastmod = time.ctime(os.path.getmtime(f))
     if file_len(f) > 0 and ##### need to compare record length(line length):
         return move_to_success_folder_and_read(f)
     else:
@@ -125,7 +133,7 @@ def validate_files(f):
 # Failure/Success Folder Functions
 
 def move_to_failure_folder_and_return_error_file(f):
-    filename, rootdir, lastmod, creation, filesize = fileinfo(f) #I am being redundant for the sake of explicitness to the compiler  
+    filename, rootdir, filesize = fileinfo(f) #I am being redundant for the sake of explicitness to the compiler  
     os.mkdir('Failure')
     copy_and_move_file(rootdir, 'Failure') #file src to file destination
     initialize_logger('rootdir/Failure')
@@ -133,7 +141,7 @@ def move_to_failure_folder_and_return_error_file(f):
      
              
 def move_to_success_folder_and_read(f):
-    filename, rootdir, lastmod, creation, filesize = fileinfo(f)  
+    filename, rootdir, filesize = fileinfo(f)  
     os.mkdir('Success')
     copy_and_move_file(rootdir, 'Success') #file src to file destination
     print("Success", f)
@@ -142,4 +150,4 @@ def move_to_success_folder_and_read(f):
 
 
 if __name__ == '__main__':
-   main(dirlist) 
+   main(path) 
